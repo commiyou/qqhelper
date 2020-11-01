@@ -25,8 +25,16 @@ public class QQHelper implements IXposedHookLoadPackage {
             return;
         final Class<?> text_msg_class = lpparam.classLoader.loadClass("com.tencent.mobileqq.data.MessageForText");
         final Class<?> msg_record_class = lpparam.classLoader.loadClass("com.tencent.mobileqq.data.MessageRecord");
+        Class<?> base_chat_pie_class = XposedHelpers.findClassIfExists("com.tencent.mobileqq.activity.BaseChatPie", lpparam.classLoader);
+        if (base_chat_pie_class == null) {
+            base_chat_pie_class = XposedHelpers.findClassIfExists("com.tencent.mobileqq.activity.aio.core.BaseChatPie", lpparam.classLoader);
+        }
+        if (base_chat_pie_class == null) {
+            XposedBridge.log("Incompatible version of mobileqq, QQHlepr won't work!");
+            return;
+        }
 
-        findAndHookMethod(CLASS_NAME, lpparam.classLoader, "update", "java.util.Observable", "java.lang.Object", new XC_MethodHook() {
+        findAndHookMethod(base_chat_pie_class.getName(), lpparam.classLoader, "update", "java.util.Observable", "java.lang.Object", new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 // this will be called before the clock was updated by the original method
@@ -63,7 +71,7 @@ public class QQHelper implements IXposedHookLoadPackage {
                 String senderuin = (String) field.get(obj);
                 intent.putExtra("senderuin", senderuin);
 
-                if (senderuin != selfuin) {
+                if (!senderuin.equals(selfuin)) {
                     return;
                 }
 
@@ -79,15 +87,10 @@ public class QQHelper implements IXposedHookLoadPackage {
                 String msg = (String) field.get(obj);
                 intent.putExtra("msg", msg);
 
-                Context context = (Context) AndroidAppHelper.currentApplication().getApplicationContext();
+                Context context = AndroidAppHelper.currentApplication().getApplicationContext();
                 context.sendBroadcast(intent);
-                //XposedBridge.log("send broadcast");
+                XposedBridge.log("send msg to "+frienduin) ;
 
-            }
-
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                // this will be called after the clock was updated by the original method
             }
         });
 
