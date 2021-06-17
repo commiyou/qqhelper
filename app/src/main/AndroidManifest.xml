@@ -14,9 +14,9 @@
         android:value="true" />
     <meta-data
         android:name="xposeddescription"
-        android:value="qq发送消息时广播com.cooltol.qqhelper.QQ_MSG_SENT" />
+        android:value="qq发送消息时广播com.cooltol.qqhelper.QQ_MSG_SENT, wechat发送消息时广播com.cooltol.qqhelper.MM_MSG_SENT" />
     <meta-data
         android:name="xposedminversion"
-        android:value="53" />
+        android:value="54" />
     </application>
 </manifest>
